@@ -868,6 +868,7 @@ stamps/build-qemu: $(QEMU_SRCDIR) $(QEMU_SRC_GIT)
 		--interp-prefix=$(INSTALL_DIR)/sysroot \
 		--python=python3
 	$(MAKE) -C $(notdir $@)
+	$(MAKE) -C $(notdir $@) plugins
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@)
 	date > $@
