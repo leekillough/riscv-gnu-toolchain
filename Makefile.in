@@ -371,8 +371,8 @@ endif
 	cd $(notdir $@) && \
 		CC="$(GLIBC_CC_FOR_TARGET) $($@_CFLAGS)" \
 		CXX="this-is-not-the-compiler-youre-looking-for" \
-		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
-		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
+		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
 		ASFLAGS="$(ASFLAGS_FOR_TARGET) $($@_CFLAGS)" \
 		$</configure \
 		--host=$(call make_tuple,$($@_XLEN),linux-gnu) \
@@ -420,8 +420,8 @@ stamps/build-gcc-linux-stage1: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-binutil
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true install-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-target-libgcc
@@ -455,8 +455,8 @@ stamps/build-gcc-linux-stage2: $(GCC_SRCDIR) $(GCC_SRC_GIT) $(addprefix stamps/b
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(LINUX_TUPLE)/lib* $(SYSROOT)
@@ -604,8 +604,8 @@ stamps/build-newlib: $(NEWLIB_SRCDIR) $(NEWLIB_SRC_GIT) stamps/build-gcc-newlib-
 		--enable-newlib-io-long-long \
 		--enable-newlib-io-c99-formats \
 		--enable-newlib-register-fini \
-		CFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O3 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O3 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
@@ -749,8 +749,8 @@ stamps/build-gcc-musl-stage1: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-binutils
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true install-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-target-libgcc
@@ -776,8 +776,8 @@ stamps/build-musl-linux: $(MUSL_SRCDIR) $(MUSL_SRC_GIT) stamps/build-gcc-musl-st
 	cd $(notdir $@) && \
 		CC="$(MUSL_CC_FOR_TARGET) $($@_CFLAGS)" \
 		CXX="$(MUSL_CXX_FOR_TARGET) $($@_CFLAGS)" \
-		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
-		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
+		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
 		ASFLAGS="$(ASFLAGS_FOR_TARGET) $($@_CFLAGS)" \
 		$</configure \
 		--host=$(MUSL_TUPLE) \
@@ -817,8 +817,8 @@ stamps/build-gcc-musl-stage2: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-musl-lin
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(MUSL_TUPLE)/lib* $(SYSROOT)
