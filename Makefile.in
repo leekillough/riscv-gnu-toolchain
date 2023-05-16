@@ -17,14 +17,14 @@ LLVM_SRCDIR := @with_llvm_src@
 
 SIM ?= @WITH_SIM@
 
-ifeq ($(srcdir)/riscv-gcc,$(GCC_SRCDIR))
+ifeq ($(srcdir)/gcc,$(GCC_SRCDIR))
 # We need a relative source dir for the gcc configure, to make msys2 mingw64
 # builds work.  Mayberelsrcdir is relative if a relative path was used to run
 # configure, otherwise absolute, so we have to check.
 mayberelsrcdir := @top_srcdir@
 gccsrcdir := $(shell case $(mayberelsrcdir) in \
-		  ([\\/]* | ?:[\\/]*)  echo $(mayberelsrcdir)/riscv-gcc ;; \
-		  (*)  echo ../$(mayberelsrcdir)/riscv-gcc ;; \
+		  ([\\/]* | ?:[\\/]*)  echo $(mayberelsrcdir)/gcc ;; \
+		  (*)  echo ../$(mayberelsrcdir)/gcc ;; \
 		esac)
 else
 gccsrcdir := $(abspath $(GCC_SRCDIR))
@@ -95,6 +95,7 @@ NEWLIB_CC_FOR_TARGET ?= $(NEWLIB_TUPLE)-gcc
 NEWLIB_CXX_FOR_TARGET ?= $(NEWLIB_TUPLE)-g++
 NEWLIB_TARGET_BOARDS ?= $(shell echo "$(NEWLIB_MULTILIB_NAMES)" | sed 's!\([_a-z0-9]*\)-\([_a-z0-9]*\)!riscv-sim/-march=\1/-mabi=\2/@cmodel@!g')
 NEWLIB_NANO_TARGET_BOARDS ?= $(shell echo "$(NEWLIB_MULTILIB_NAMES)" | sed 's!\([_a-z0-9]*\)-\([_a-z0-9]*\)!riscv-sim-nano/-march=\1/-mabi=\2/@cmodel@!g')
+NEWLIB_CC_FOR_MULTILIB_INFO := $(NEWLIB_CC_FOR_TARGET)
 
 MUSL_TARGET_FLAGS := $(MUSL_TARGET_FLAGS_EXTRA)
 MUSL_CC_FOR_TARGET ?= $(MUSL_TUPLE)-gcc
@@ -393,8 +394,8 @@ endif
 	cd $(notdir $@) && \
 		CC="$(GLIBC_CC_FOR_TARGET) $($@_CFLAGS)" \
 		CXX="this-is-not-the-compiler-youre-looking-for" \
-		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
-		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
+		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
 		ASFLAGS="$(ASFLAGS_FOR_TARGET) $($@_CFLAGS)" \
 		$</configure \
 		--host=$(call make_tuple,$($@_XLEN),linux-gnu) \
@@ -442,8 +443,9 @@ stamps/build-gcc-linux-stage1: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-binutil
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
+		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true install-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-target-libgcc
@@ -477,8 +479,9 @@ stamps/build-gcc-linux-stage2: $(GCC_SRCDIR) $(GCC_SRC_GIT) $(addprefix stamps/b
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
+		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(LINUX_TUPLE)/lib* $(SYSROOT)
@@ -531,6 +534,7 @@ stamps/build-gcc-linux-native: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-gcc-lin
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(LINUX_TUPLE)/lib* $(SYSROOT)
@@ -609,6 +613,7 @@ stamps/build-gcc-newlib-stage1: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-binuti
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
 		CFLAGS_FOR_TARGET="-Os $(CFLAGS_FOR_TARGET)" \
 		CXXFLAGS_FOR_TARGET="-Os $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) all-gcc
@@ -626,8 +631,8 @@ stamps/build-newlib: $(NEWLIB_SRCDIR) $(NEWLIB_SRC_GIT) stamps/build-gcc-newlib-
 		--enable-newlib-io-long-long \
 		--enable-newlib-io-c99-formats \
 		--enable-newlib-register-fini \
-		CFLAGS_FOR_TARGET="-O3 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O3 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CXXFLAGS_FOR_TARGET)"
+		CFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 -D_POSIX_MODE -ffunction-sections -fdata-sections $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
@@ -658,8 +663,13 @@ stamps/build-newlib-nano: $(NEWLIB_SRCDIR) $(NEWLIB_SRC_GIT) stamps/build-gcc-ne
 
 stamps/merge-newlib-nano: stamps/build-newlib-nano stamps/build-newlib
 # Copy nano library files into newlib install dir.
+	if [ -f $(INSTALL_DIR)/bin/$(NEWLIB_TUPLE)-gcc ] ; then \
+		export NEWLIB_CC_FOR_MULTILIB_INFO="$(INSTALL_DIR)/bin/$(NEWLIB_TUPLE)-gcc"; \
+	else \
+		export NEWLIB_CC_FOR_MULTILIB_INFO="$(NEWLIB_CC_FOR_TARGET)"; \
+	fi
 	set -e; \
-        for ml in `$(INSTALL_DIR)/bin/$(NEWLIB_TUPLE)-gcc --print-multi-lib`; \
+        for ml in `${NEWLIB_CC_FOR_MULTILIB_INFO} --print-multi-lib`; \
 	do \
 	    mld=`echo $${ml} | sed -e 's/;.*$$//'`; \
 	    cp $(builddir)/install-newlib-nano/$(NEWLIB_TUPLE)/lib/$${mld}/libc.a \
@@ -709,6 +719,7 @@ stamps/build-gcc-newlib-stage2: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-newlib
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
 		CFLAGS_FOR_TARGET="-Os $(CFLAGS_FOR_TARGET)" \
 		CXXFLAGS_FOR_TARGET="-Os $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
@@ -771,8 +782,9 @@ stamps/build-gcc-musl-stage1: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-binutils
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
+		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true install-gcc
 	$(MAKE) -C $(notdir $@) inhibit-libc=true all-target-libgcc
@@ -798,8 +810,8 @@ stamps/build-musl-linux: $(MUSL_SRCDIR) $(MUSL_SRC_GIT) stamps/build-gcc-musl-st
 	cd $(notdir $@) && \
 		CC="$(MUSL_CC_FOR_TARGET) $($@_CFLAGS)" \
 		CXX="$(MUSL_CXX_FOR_TARGET) $($@_CFLAGS)" \
-		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
-		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O3 $($@_CFLAGS)" \
+		CFLAGS="$(CFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET) -g -O2 $($@_CFLAGS)" \
 		ASFLAGS="$(ASFLAGS_FOR_TARGET) $($@_CFLAGS)" \
 		$</configure \
 		--host=$(MUSL_TUPLE) \
@@ -839,8 +851,9 @@ stamps/build-gcc-musl-stage2: $(GCC_SRCDIR) $(GCC_SRC_GIT) stamps/build-musl-lin
 		$(WITH_ARCH) \
 		$(WITH_TUNE) \
 		$(WITH_ISA_SPEC) \
-		CFLAGS_FOR_TARGET="-O3 $(CFLAGS_FOR_TARGET)" \
-		CXXFLAGS_FOR_TARGET="-O3 $(CXXFLAGS_FOR_TARGET)"
+		$(GCC_EXTRA_CONFIGURE_FLAGS) \
+		CFLAGS_FOR_TARGET="-O2 $(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="-O2 $(CXXFLAGS_FOR_TARGET)"
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	cp -a $(INSTALL_DIR)/$(MUSL_TUPLE)/lib* $(SYSROOT)
@@ -890,7 +903,6 @@ stamps/build-qemu: $(QEMU_SRCDIR) $(QEMU_SRC_GIT)
 		--interp-prefix=$(INSTALL_DIR)/sysroot \
 		--python=python3
 	$(MAKE) -C $(notdir $@)
-	$(MAKE) -C $(notdir $@) plugins
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@)
 	date > $@
@@ -967,7 +979,9 @@ stamps/build-llvm-linux: $(LLVM_SRCDIR) $(LLVM_SRC_GIT) \
 		-DCOMPILER_RT_BUILD_MEMPROF=OFF \
 		-DCOMPILER_RT_BUILD_PROFILE=OFF \
 		-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
-		-DCOMPILER_RT_BUILD_XRAY=OFF
+		-DCOMPILER_RT_BUILD_XRAY=OFF \
+		-DCMAKE_C_COMPILER_WORKS=1 \
+		-DCMAKE_CXX_COMPILER_WORKS=1
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	# Add symlinks with target-triplet prefix
