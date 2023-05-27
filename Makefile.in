@@ -957,7 +957,8 @@ stamps/build-llvm-linux: $(LLVM_SRCDIR) $(LLVM_SRC_GIT) \
 #	ln -sf $(INSTALL_DIR)/lib/gcc $(SYSROOT)/lib/gcc
 #	ln -sf "$(INSTALL_DIR)/
 	# Build runtime libs
-	cd $(notdir $@) && LDFLAGS="-fuse-ld=lld -L $(INSTALL_DIR)/sysroot/lib" \
+	cd $(notdir $@) && \
+		LDFLAGS="-v -fuse-ld=lld -L $(INSTALL_DIR)/sysroot/lib" \
 		cmake $(LLVM_SRCDIR)/llvm \
 		-DCMAKE_AR=$(INSTALL_DIR)/host/bin/llvm-ar \
 		-DCMAKE_BUILD_TYPE=Release \
@@ -983,7 +984,6 @@ stamps/build-llvm-linux: $(LLVM_SRCDIR) $(LLVM_SRC_GIT) \
 		-DCOMPILER_RT_BUILD_PROFILE=OFF \
 		-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
 		-DCOMPILER_RT_BUILD_XRAY=OFF
-
 	$(MAKE) -C $(notdir $@)
 	$(MAKE) -C $(notdir $@) install
 	mkdir -p $(dir $@) && touch $@
